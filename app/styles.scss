@@ -1,0 +1,374 @@
+// file: app/styles.scss
+
+/* SCSS Variables - Theme Colors */
+$max-width: 1300px;
+$header-height: 12vh;
+$footer-height: 8vh;
+$main-height: calc(100vh - #{$header-height} - #{$footer-height});
+$edge-spacing: 0.5rem;
+
+/** 
+----------------------------
+Light Theme Colors 
+**/
+$color-text-primary-light: #000000;
+$color-text-secondary-light: #666666;
+
+/* Light Theme Background Colors */
+$color-background-primary-light: #FEFAE0;
+
+/* Light Theme Border Colors */
+$color-border-primary-light: #cccccc;
+$color-border-secondary-light: #dddddd;
+
+/* Light Theme Accent Colors */
+$color-accent-primary-light: #808080;
+$color-accent-secondary-light: #666666;
+
+/* Light Theme Switch Colors */
+$color-switch-background-light: #cccccc;
+$color-switch-button: #ffffff;
+
+
+
+
+/** 
+----------------------------
+Dark Theme Colors 
+**/
+$color-text-primary-dark: #FEFAE0;
+$color-text-secondary-dark: #a0a0a0;
+
+/* Dark Theme Background Colors */
+$color-background-primary-dark: #121212;
+
+/* Dark Theme Border Colors */
+$color-border-primary-dark: #444444;
+$color-border-secondary-dark: #333333;
+
+/* Dark Theme Accent Colors */
+$color-accent-primary-dark: #a0a0a0;
+$color-accent-secondary-dark: #808080;
+
+/* Dark Theme Switch Colors */
+$color-switch-background-dark: #666666;
+
+/* Base styles - Mobile first */
+html {
+  transition: color 0.3s ease, background-color 0.3s ease;
+  height: 100%;
+  padding: $edge-spacing;
+}
+
+body {
+  color: $color-text-primary-light;
+  background-color: $color-background-primary-light;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+[data-theme="dark"] body {
+  color: $color-text-primary-dark;
+  background-color: $color-background-primary-dark;
+}
+
+header, main, section, h1, h2, h3, article, footer {
+  padding: 0;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Navigation styles */
+nav {
+  ul {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  a {
+    color: $color-text-primary-light;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.8;
+    }
+
+    &.active {
+      font-weight: bold;
+    }
+  }
+}
+
+[data-theme="dark"] nav a {
+  color: $color-text-primary-dark;
+}
+
+/* Theme switch styles */
+.theme-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 30px;
+
+  input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--color-switch-background);
+  transition: 0.4s;
+
+  &:before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 4px;
+    bottom: 4px;
+    background-color: var(--color-switch-button);
+    transition: 0.4s;
+  }
+}
+
+[data-theme="dark"] .slider {
+  background-color: $color-switch-background-dark;
+}
+
+input:checked + .slider {
+  background-color: var(--color-accent-primary);
+}
+
+[data-theme="dark"] input:checked + .slider {
+  background-color: $color-accent-primary-dark;
+}
+
+input:checked + .slider:before {
+  transform: translateX(22px);
+}
+
+.slider.round {
+  border-radius: 30px;
+
+  &:before {
+    border-radius: 50%;
+  }
+}
+
+/* Container styles */
+.container-basic-border {
+  border: 1px solid $color-border-primary-light;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0.5rem auto;
+  width: 95%;
+  max-width: $max-width;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+[data-theme="dark"] .container-basic-border {
+  border-color: $color-border-primary-dark;
+}
+
+.container-basic {
+  width: 95%;
+  max-width: $max-width;
+  margin: 0.5rem auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.container-basic-left {
+  width: 95%;
+  max-width: $max-width;
+  margin: 0.5rem auto;
+  text-align: left;
+}
+
+.container-basic-center {
+  width: 95%;
+  max-width: $max-width;
+  margin: 0.5rem auto;
+  text-align: center;
+}
+
+.container {
+  width: 95%;
+  max-width: $max-width;
+  margin: 0.5rem auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.container-border {
+  @extend .container;
+  border: 1px solid $color-border-primary-light;
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.container-left {
+  @extend .container;
+  text-align: left;
+}
+
+.container-center {
+  @extend .container;
+  text-align: center;
+}
+
+[data-theme="dark"] .container-border {
+  border-color: $color-border-primary-dark;
+}
+
+/* Header layout */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  height: $header-height;
+}
+
+/* Main content */
+main {
+  min-height: $main-height;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.main-content {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Footer layout */
+footer {
+  height: $footer-height;
+  display: flex;
+  align-items: center;
+}
+
+/* Accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: $color-accent-primary-light;
+  color: $color-switch-button;
+  padding: 8px;
+  z-index: 100;
+  transition: top 0.3s;
+
+  &:focus {
+    top: 0;
+  }
+}
+
+[data-theme="dark"] .skip-link {
+  background: $color-accent-primary-dark;
+}
+
+/* Header Components */
+.header-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  height: 100%;
+}
+
+/* Footer Components */
+.footer-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.legal-text {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  opacity: 0.8;
+  color: $color-text-secondary-light;
+}
+
+[data-theme="dark"] .legal-text {
+  color: $color-text-secondary-dark;
+}
+
+/* Tablet styles */
+@media (min-width: 600px) {
+  body {
+    font-size: 17px;
+  }
+
+  .header-content {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .container-basic,
+  .container-basic-border,
+  .container-basic-left,
+  .container-basic-center {
+    width: 90%;
+  }
+
+  .legal-text {
+    display: inline;
+    margin-top: 0;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 1200px) {
+  body {
+    font-size: 18px;
+  }
+
+  .container-basic,
+  .container-basic-border,
+  .container-basic-left,
+  .container-basic-center {
+    width: 85%;
+  }
+}
+
+[data-theme="dark"] {
+  --color-switch-background: #666666;
+  --color-switch-button: #ffffff;
+  --color-accent-primary: #a0a0a0;
+}

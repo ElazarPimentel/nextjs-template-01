@@ -1,0 +1,534 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["multiSchema"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  schemas  = ["users_sec_transporte"]
+}
+
+model apoderados_legacy {
+  id                          Int       @id @default(autoincrement())
+  apellido                    String?   @db.VarChar(20)
+  nombres                     String?   @db.VarChar(20)
+  dni                         Decimal?  @db.Decimal(8, 0)
+  cuit                        Decimal?  @db.Decimal(11, 0)
+  empresa                     Decimal?  @db.Decimal(6, 0)
+  observaciones               String?   @db.VarChar(60)
+  Fecha_de_alta               DateTime? @map("Fecha de alta") @db.Date
+  Fecha_de_baja               DateTime? @map("Fecha de baja") @db.Date
+  ltima_fecha_de_modificaci_n DateTime? @map("Última fecha de modificación") @db.Date
+  id_apoderado                Decimal?  @db.Decimal(4, 0)
+  domicilio_calle             String?
+  domicilio_numero            String?
+  domicilio_localidad         String?
+  domicilio_provincia         String?
+  Domicilio_C_digo_Postal     String?   @map("Domicilio_Código Postal")
+
+  @@schema("users_sec_transporte")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model asociaciones_entidad_persona {
+  id                               Int                                @id(map: "entidad_persona_associations_pkey") @default(autoincrement())
+  entidad_id                       Int
+  persona_id                       Int
+  tipo_asociacion_id               Int
+  fecha_inicio                     DateTime                           @db.Date
+  fecha_fin                        DateTime?                          @db.Date
+  creado_en                        DateTime?                          @default(now()) @db.Timestamptz(6)
+  creado_por                       Int?
+  borrado_en                       DateTime?                          @db.Timestamptz(6)
+  borrado_por                      Int?
+  opciones                         opciones                           @relation(fields: [tipo_asociacion_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "entidad_persona_associations_association_type_fkey")
+  usuarios                         usuarios?                          @relation(fields: [borrado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "entidad_persona_associations_deleted_by_fkey")
+  personas                         personas                           @relation(fields: [persona_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "entidad_persona_associations_persona_id_fkey")
+  entidades                        entidades                          @relation(fields: [entidad_id], references: [id], onUpdate: NoAction, map: "fk_asociaciones_entidad_persona_entidad_fk")
+  asociaciones_entidad_persona_log asociaciones_entidad_persona_log[]
+
+  @@unique([entidad_id, persona_id, tipo_asociacion_id], map: "unique_entidad_persona_association")
+  @@index([fecha_inicio, fecha_fin], map: "idx_asociaciones_entidad_persona_dates")
+  @@index([fecha_inicio, fecha_fin], map: "idx_entidad_persona_associations_dates")
+  @@index([entidad_id], map: "idx_entidad_persona_associations_entidad_id")
+  @@index([persona_id], map: "idx_entidad_persona_associations_persona_id")
+  @@schema("users_sec_transporte")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model asociaciones_entidad_persona_log {
+  id                              Int                           @id(map: "entidad_persona_associations_log_pkey") @default(autoincrement())
+  asociaciones_entidad_persona_id Int?
+  tipo_accion                     String?                       @db.VarChar(10)
+  cambiado_por                    Int?
+  cambiado_en                     DateTime?                     @default(now()) @db.Timestamptz(6)
+  datos_anteriores                Json?
+  datos_nuevos                    Json?
+  asociaciones_entidad_persona    asociaciones_entidad_persona? @relation(fields: [asociaciones_entidad_persona_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "entidad_persona_associations__entidad_persona_association__fkey")
+  usuarios                        usuarios?                     @relation(fields: [cambiado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "entidad_persona_associations_log_changed_by_fkey")
+
+  @@index([asociaciones_entidad_persona_id], map: "idx_entidad_persona_associations_log_id")
+  @@schema("users_sec_transporte")
+}
+
+model correos_electronicos {
+  id                       Int                        @id(map: "email_addresses_pkey") @default(autoincrement())
+  entidad_id               Int?
+  persona_id               Int?
+  correo                   String                     @db.VarChar(255)
+  observaciones            String?
+  borrado_en               DateTime?                  @db.Timestamptz(6)
+  creado_en                DateTime?                  @default(now()) @db.Timestamptz(6)
+  creado_por               Int?
+  borrado_por              Int?
+  usuarios                 usuarios?                  @relation(fields: [borrado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "email_addresses_deleted_by_fkey")
+  personas                 personas?                  @relation(fields: [persona_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "email_addresses_persona_id_fkey")
+  correos_electronicos_log correos_electronicos_log[]
+
+  @@index([entidad_id], map: "idx_email_addresses_entity_id")
+  @@index([persona_id], map: "idx_email_addresses_persona_id")
+  @@schema("users_sec_transporte")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model correos_electronicos_log {
+  id                    Int                   @id(map: "email_addresses_log_pkey") @default(autoincrement())
+  correo_electronico_id Int?
+  tipo_accion           String?               @db.VarChar(10)
+  cambiado_por          Int?
+  cambiado_en           DateTime?             @default(now()) @db.Timestamptz(6)
+  datos_anteriores      Json?
+  datos_nuevos          Json?
+  usuarios              usuarios?             @relation(fields: [cambiado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "email_addresses_log_changed_by_fkey")
+  correos_electronicos  correos_electronicos? @relation(fields: [correo_electronico_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "email_addresses_log_email_address_id_fkey")
+
+  @@index([correo_electronico_id], map: "idx_email_addresses_log_email_address_id")
+  @@schema("users_sec_transporte")
+}
+
+model direcciones_postales {
+  id                       Int                        @id(map: "postal_addresses_pkey") @default(autoincrement())
+  entidad_id               Int?
+  persona_id               Int?
+  calle                    String?                    @db.VarChar(255)
+  altura                   String?                    @db.VarChar(255)
+  piso                     String?                    @db.VarChar(255)
+  depto                    String?                    @db.VarChar(255)
+  codigo_postal            String?                    @db.VarChar(20)
+  ciudad                   String?                    @db.VarChar(255)
+  pais                     String?                    @db.VarChar(255)
+  tipo_direccion_id        Int?
+  observaciones            String?
+  borrado_en               DateTime?                  @db.Timestamptz(6)
+  creado_en                DateTime?                  @default(now()) @db.Timestamptz(6)
+  creado_por               Int?
+  borrado_por              Int?
+  personas                 personas?                  @relation(fields: [persona_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "fk_direcciones_postales_persona_fk")
+  opciones                 opciones?                  @relation(fields: [tipo_direccion_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "fk_direcciones_postales_tipo_direccion_fk")
+  usuarios                 usuarios?                  @relation(fields: [borrado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "postal_addresses_deleted_by_fkey")
+  direcciones_postales_log direcciones_postales_log[]
+
+  @@schema("users_sec_transporte")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model direcciones_postales_log {
+  id                   Int                   @id(map: "postal_addresses_log_pkey") @default(autoincrement())
+  direccion_postal_id  Int?
+  tipo_accion          String?               @db.VarChar(10)
+  cambiado_por         Int?
+  cambiado_en          DateTime?             @default(now()) @db.Timestamptz(6)
+  datos_anteriores     Json?
+  datos_nuevos         Json?
+  usuarios             usuarios?             @relation(fields: [cambiado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "postal_addresses_log_changed_by_fkey")
+  direcciones_postales direcciones_postales? @relation(fields: [direccion_postal_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "postal_addresses_log_postal_address_id_fkey")
+
+  @@index([direccion_postal_id], map: "idx_postal_addresses_log_postal_address_id")
+  @@schema("users_sec_transporte")
+}
+
+model empresas_legacy {
+  id                 Int       @id @default(autoincrement())
+  empcod             Int?
+  emprazon           String?   @db.VarChar(50)
+  empcuit            String?   @db.VarChar(11)
+  empnomfan          String?   @db.VarChar(50)
+  empfecinsc         DateTime? @db.Date
+  emptrans           String?   @db.Char(1)
+  empcert            Int?
+  empfec             DateTime? @db.Date
+  empfecv            DateTime? @db.Date
+  empcat             String?   @db.Char(1)
+  empemail           String?   @db.VarChar(20)
+  emptsoc            String?   @db.Char(1)
+  empser             String?   @db.Char(1)
+  empalca            String?   @db.Char(1)
+  empdlusr           Int?
+  empdlfec           DateTime? @db.Date
+  empcod_persona     Int?
+  empnombre          String?   @db.VarChar(50)
+  empapellido        String?   @db.VarChar(50)
+  empcuit_persona    Decimal?  @db.Decimal(11, 0)
+  empdni             Int?
+  empnomfan_persona  String?   @db.VarChar(50)
+  empfecinsc_persona DateTime? @db.Date
+  emptrans_persona   String?   @db.Char(1)
+  empcert_persona    Int?
+  empfec_persona     DateTime? @db.Date
+  empfecv_persona    DateTime? @db.Date
+  empcatc_persona    String?   @db.Char(1)
+  empemail_persona   String?   @db.VarChar(20)
+  empser_persona     String?   @db.Char(1)
+  empalca_persona    String?   @db.Char(1)
+  empdlusr_persona   Int?
+  empdlfec_persona   DateTime? @db.Date
+  empdreal           String?
+  empdrepos          String?
+  empdrloc           String?
+  empdrpro           String?
+  empdrtel           String?
+  empdoper           String?
+  empdoposemp        String?
+  empdoloc           String?
+  empdopro           String?
+  empdotel           String?
+
+  @@schema("users_sec_transporte")
+}
+
+model entidades {
+  id                                       Int                            @id @default(autoincrement())
+  nombre                                   String                         @db.VarChar(255)
+  nombre_corto                             String?                        @db.VarChar(50)
+  cuit                                     String?                        @unique(map: "entidades_cuit_unique") @db.VarChar(13)
+  observaciones                            String?
+  creado_por                               Int?
+  creado_en                                DateTime?                      @default(now()) @db.Timestamptz(6)
+  borrado_en                               DateTime?                      @db.Timestamptz(6)
+  borrado_por                              Int?
+  asociaciones_entidad_persona             asociaciones_entidad_persona[]
+  usuarios_entidades_creado_porTousuarios  usuarios?                      @relation("entidades_creado_porTousuarios", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "entidades_created_by_fkey")
+  usuarios_entidades_borrado_porTousuarios usuarios?                      @relation("entidades_borrado_porTousuarios", fields: [borrado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "entidades_deleted_by_fkey")
+  entidades_log                            entidades_log[]
+  lineas                                   lineas[]
+
+  @@index([cuit], map: "idx_entidades_cuit")
+  @@schema("users_sec_transporte")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model entidades_log {
+  log_id       Int        @id @default(autoincrement())
+  entidades_id Int?
+  action_type  String?    @db.VarChar(10)
+  cambiado_por Int?
+  cambiado_en  DateTime?  @default(now()) @db.Timestamptz(6)
+  old_data     Json?
+  new_data     Json?
+  usuarios     usuarios?  @relation(fields: [cambiado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "entidades_log_changed_by_fkey")
+  entidades    entidades? @relation(fields: [entidades_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "entidades_log_entidad_id_fkey")
+
+  @@index([entidades_id], map: "idx_entidades_log_entidad_id")
+  @@schema("users_sec_transporte")
+}
+
+model lineas {
+  id                                     Int          @id @default(autoincrement())
+  entidad_id                             Int
+  numero_linea                           Int
+  ramal                                  String       @db.VarChar(1)
+  linea_y_ramal                          String       @unique @db.VarChar(10)
+  color_linea                            String?      @db.VarChar(255)
+  cabecera_partida                       String       @db.VarChar(60)
+  cabecera_destino                       String       @db.VarChar(60)
+  estado                                 String       @default("activo") @db.VarChar(20)
+  creado_en                              DateTime?    @default(now()) @db.Timestamptz(6)
+  creado_por                             Int?
+  borrado_en                             DateTime?    @db.Timestamptz(6)
+  borrado_por                            Int?
+  sentido_id                             Int
+  temporada_id                           Int?
+  tipo_dia_id                            Int
+  entidades                              entidades    @relation(fields: [entidad_id], references: [id], onUpdate: NoAction, map: "fk_lineas_entidad_fk")
+  opciones_lineas_sentido_idToopciones   opciones     @relation("lineas_sentido_idToopciones", fields: [sentido_id], references: [id], onUpdate: NoAction, map: "fk_lineas_sentido_id")
+  opciones_lineas_temporada_idToopciones opciones?    @relation("lineas_temporada_idToopciones", fields: [temporada_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "fk_lineas_temporada_id")
+  opciones_lineas_tipo_dia_idToopciones  opciones     @relation("lineas_tipo_dia_idToopciones", fields: [tipo_dia_id], references: [id], onUpdate: NoAction, map: "fk_lineas_tipo_dia_id")
+  usuarios_lineas_creado_porTousuarios   usuarios?    @relation("lineas_creado_porTousuarios", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "lineas_created_by_fkey")
+  usuarios_lineas_borrado_porTousuarios  usuarios?    @relation("lineas_borrado_porTousuarios", fields: [borrado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "lineas_deleted_by_fkey")
+  lineas_log                             lineas_log[]
+
+  @@unique([entidad_id, numero_linea, ramal, sentido_id, tipo_dia_id], map: "unique_lineas_combo")
+  @@index([entidad_id, linea_y_ramal], map: "idx_lineas_entidad_linea_ramal")
+  @@schema("users_sec_transporte")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model lineas_log {
+  id               Int       @id @default(autoincrement())
+  linea_id         Int?
+  tipo_accion      String?   @db.VarChar(10)
+  cambiado_por     Int?
+  cambiado_en      DateTime? @default(now()) @db.Timestamptz(6)
+  datos_anteriores Json?
+  datos_nuevos     Json?
+  usuarios         usuarios? @relation(fields: [cambiado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "lineas_log_changed_by_fkey")
+  lineas           lineas?   @relation(fields: [linea_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "lineas_log_lineas_id_fkey")
+
+  @@index([linea_id], map: "idx_lineas_log_linemeals")
+  @@schema("users_sec_transporte")
+}
+
+model numeros_telefonicos {
+  id                      Int                       @id(map: "telephone_numbers_pkey") @default(autoincrement())
+  entidad_id              Int?
+  persona_id              Int?
+  numero_telefono         String                    @db.VarChar(255)
+  tipo_telefono_id        Int?
+  observaciones           String?
+  borrado_en              DateTime?                 @db.Timestamptz(6)
+  creado_en               DateTime?                 @default(now()) @db.Timestamptz(6)
+  creado_por              Int?
+  borrado_por             Int?
+  personas                personas?                 @relation(fields: [persona_id], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "fk_numeros_telefonicos_persona_fk")
+  usuarios                usuarios?                 @relation(fields: [borrado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "telephone_numbers_deleted_by_fkey")
+  opciones                opciones?                 @relation(fields: [tipo_telefono_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "telephone_numbers_tipo_telefono_id_fkey")
+  numeros_telefonicos_log numeros_telefonicos_log[]
+
+  @@schema("users_sec_transporte")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model numeros_telefonicos_log {
+  id                   Int                  @id(map: "telephone_numbers_log_pkey") @default(autoincrement())
+  numero_telefonico_id Int?
+  tipo_accion          String?              @db.VarChar(10)
+  cambiado_por         Int?
+  cambiado_en          DateTime?            @default(now()) @db.Timestamptz(6)
+  datos_anteriores     Json?
+  datos_nuevos         Json?
+  usuarios             usuarios?            @relation(fields: [cambiado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "telephone_numbers_log_changed_by_fkey")
+  numeros_telefonicos  numeros_telefonicos? @relation(fields: [numero_telefonico_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "telephone_numbers_log_telephone_number_id_fkey")
+
+  @@index([numero_telefonico_id], map: "idx_telephone_numbers_log_telephone_number_id")
+  @@schema("users_sec_transporte")
+}
+
+model opciones {
+  id                                   Int                            @id(map: "options_pkey") @default(autoincrement())
+  grupo_nombre                         String                         @db.VarChar(60)
+  campo_nombre                         String                         @db.VarChar(60)
+  codigo_opcion                        String                         @db.VarChar(255)
+  descripcion_opcion                   String?
+  borrado_en                           DateTime?                      @db.Timestamptz(6)
+  creado_en                            DateTime?                      @default(now()) @db.Timestamptz(6)
+  creado_por                           Int?
+  borrado_por                          Int?
+  etiqueta_opcion                      String                         @default("TEMP_LABEL") @db.VarChar(50)
+  asociaciones_entidad_persona         asociaciones_entidad_persona[]
+  direcciones_postales                 direcciones_postales[]
+  lineas_lineas_sentido_idToopciones   lineas[]                       @relation("lineas_sentido_idToopciones")
+  lineas_lineas_temporada_idToopciones lineas[]                       @relation("lineas_temporada_idToopciones")
+  lineas_lineas_tipo_dia_idToopciones  lineas[]                       @relation("lineas_tipo_dia_idToopciones")
+  numeros_telefonicos                  numeros_telefonicos[]
+  usuarios                             usuarios?                      @relation(fields: [borrado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "options_deleted_by_fkey")
+  opciones_log                         opciones_log[]
+  personas                             personas[]
+
+  @@unique([grupo_nombre, campo_nombre, codigo_opcion], map: "options_table_name_table_field_option_value_key")
+  @@schema("users_sec_transporte")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model opciones_log {
+  log_id       Int       @id(map: "options_log_pkey") @default(autoincrement())
+  opciones_id  Int?
+  action_type  String?   @db.VarChar(10)
+  cambiado_por Int?
+  cambiado_en  DateTime? @default(now()) @db.Timestamptz(6)
+  old_data     Json?
+  new_data     Json?
+  usuarios     usuarios? @relation(fields: [cambiado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "options_log_changed_by_fkey")
+  opciones     opciones? @relation(fields: [opciones_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "options_log_option_id_fkey")
+
+  @@index([opciones_id], map: "idx_options_log_option_id")
+  @@schema("users_sec_transporte")
+}
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model paradas {
+// @@schema("users_sec_transporte")
+// }
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model paradas_log {
+// @@schema("users_sec_transporte")
+// }
+
+model personas {
+  id                                      Int                            @id @default(autoincrement())
+  codigo_identificador_nacional           Int?
+  nombre                                  String                         @db.VarChar(50)
+  apellido                                String                         @db.VarChar(50)
+  cuit_cuil                               Decimal?                       @unique(map: "personas_cuit_cuil_unique") @db.Decimal(11, 0)
+  persona_dni                             Int?                           @unique(map: "personas_dni_unique")
+  persona_nombre_de_fantasia              String?                        @db.VarChar(50)
+  persona_fecha_inscripcion               DateTime?                      @db.Date
+  persona_tipo_inscripcion                String?                        @db.Char(1)
+  persona_numero_certificado              Int?
+  persona_fecha_emision_certificado       DateTime?                      @db.Date
+  persona_fecha_vencimiento_certificado   DateTime?                      @db.Date
+  persona_categoria_certificado           String?                        @db.Char(1)
+  persona_correo_electronico_legado       String?                        @db.VarChar(20)
+  persona_tipo                            Int?
+  persona_alcance                         String?                        @db.Char(1)
+  persona_operador_carga_legado           Int?
+  persona_fecha_carga_legado              DateTime?                      @db.Date
+  apoderado_legacy_id                     Int?
+  borrado_en                              DateTime?                      @db.Timestamptz(6)
+  creado_en                               DateTime?                      @default(now()) @db.Timestamptz(6)
+  creado_por                              Int?
+  borrado_por                             Int?
+  asociaciones_entidad_persona            asociaciones_entidad_persona[]
+  correos_electronicos                    correos_electronicos[]
+  direcciones_postales                    direcciones_postales[]
+  numeros_telefonicos                     numeros_telefonicos[]
+  usuarios_personas_borrado_porTousuarios usuarios?                      @relation("personas_borrado_porTousuarios", fields: [borrado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "personas_deleted_by_fkey")
+  opciones                                opciones?                      @relation(fields: [persona_tipo], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  personas_log                            personas_log[]
+  usuarios_usuarios_persona_idTopersonas  usuarios[]                     @relation("usuarios_persona_idTopersonas")
+
+  @@index([cuit_cuil], map: "idx_personas_cuit_cuil")
+  @@index([borrado_en], map: "idx_personas_deleted_at")
+  @@index([persona_dni], map: "idx_personas_dni")
+  @@index([persona_fecha_inscripcion], map: "idx_personas_fecha_inscripcion")
+  @@schema("users_sec_transporte")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model personas_log {
+  log_id           Int       @id @default(autoincrement())
+  persona_id       Int?
+  tipo_accion      String?   @db.VarChar(10)
+  cambiado_por     Int?
+  cambiado_en      DateTime? @default(now()) @db.Timestamptz(6)
+  datos_anteriores Json?
+  datos_nuevos     Json?
+  usuarios         usuarios? @relation(fields: [cambiado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "personas_log_changed_by_fkey")
+  personas         personas? @relation(fields: [persona_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([persona_id], map: "idx_personas_log_persona_id")
+  @@schema("users_sec_transporte")
+}
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model recorridos {
+// @@schema("users_sec_transporte")
+// }
+
+/// We could not retrieve columns for the underlying table. Either it has none or you are missing rights to see them. Please check your privileges.
+// model recorridos_log {
+// @@schema("users_sec_transporte")
+// }
+
+model roles_usuarios {
+  id                                            Int                  @id(map: "user_roles_pkey") @default(autoincrement())
+  nombre                                        String               @unique(map: "user_roles_role_name_key") @db.VarChar(50)
+  descripcion                                   String?
+  es_predeterminado                             Boolean?             @default(false)
+  creado_en                                     DateTime?            @default(now()) @db.Timestamptz(6)
+  prioridad                                     Int?
+  es_rol_sistema                                Boolean?             @default(false)
+  creado_por                                    Int?
+  borrado_en                                    DateTime?            @db.Timestamptz(6)
+  borrado_por                                   Int?
+  usuarios_roles_usuarios_creado_porTousuarios  usuarios?            @relation("roles_usuarios_creado_porTousuarios", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_roles_created_by_fkey")
+  usuarios_roles_usuarios_borrado_porTousuarios usuarios?            @relation("roles_usuarios_borrado_porTousuarios", fields: [borrado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_roles_deleted_by_fkey")
+  roles_usuarios_log                            roles_usuarios_log[]
+
+  @@schema("users_sec_transporte")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model roles_usuarios_log {
+  log_id           Int             @id(map: "user_roles_log_pkey") @default(autoincrement())
+  rol_usuario_id   Int?
+  tipo_accion      String?         @db.VarChar(10)
+  cambiado_por     Int?
+  cambiado_en      DateTime?       @default(now()) @db.Timestamptz(6)
+  datos_anteriores Json?
+  datos_nuevos     Json?
+  usuarios         usuarios?       @relation(fields: [cambiado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_roles_log_changed_by_fkey")
+  roles_usuarios   roles_usuarios? @relation(fields: [rol_usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_roles_log_role_id_fkey")
+
+  @@index([rol_usuario_id], map: "idx_user_roles_log_role_id")
+  @@schema("users_sec_transporte")
+}
+
+model usuarios {
+  id                                                  Int                                @id(map: "users_pkey") @default(autoincrement())
+  creado_en                                           DateTime?                          @default(now()) @db.Timestamptz(6)
+  activo                                              Boolean?                           @default(true)
+  ultimo_ingreso                                      DateTime?                          @db.Timestamptz(6)
+  correo_verificado                                   Boolean?                           @default(false)
+  empleado_id                                         String?                            @db.VarChar(255)
+  departamento                                        String?                            @db.VarChar(255)
+  nombre                                              String?                            @db.VarChar(255)
+  usuario                                             String                             @unique(map: "users_username_unique") @db.VarChar(255)
+  correo                                              String                             @unique(map: "users_email_unique") @db.VarChar(255)
+  hash_contrasena                                     String                             @db.VarChar(255)
+  apellido                                            String?                            @db.VarChar(255)
+  telefono                                            String?                            @db.VarChar(255)
+  persona_id                                          Int?
+  creado_por                                          Int?
+  borrado_en                                          DateTime?                          @db.Timestamptz(6)
+  borrado_por                                         Int?
+  asociaciones_entidad_persona                        asociaciones_entidad_persona[]
+  asociaciones_entidad_persona_log                    asociaciones_entidad_persona_log[]
+  correos_electronicos                                correos_electronicos[]
+  correos_electronicos_log                            correos_electronicos_log[]
+  direcciones_postales                                direcciones_postales[]
+  direcciones_postales_log                            direcciones_postales_log[]
+  entidades_entidades_creado_porTousuarios            entidades[]                        @relation("entidades_creado_porTousuarios")
+  entidades_entidades_borrado_porTousuarios           entidades[]                        @relation("entidades_borrado_porTousuarios")
+  entidades_log                                       entidades_log[]
+  lineas_lineas_creado_porTousuarios                  lineas[]                           @relation("lineas_creado_porTousuarios")
+  lineas_lineas_borrado_porTousuarios                 lineas[]                           @relation("lineas_borrado_porTousuarios")
+  lineas_log                                          lineas_log[]
+  numeros_telefonicos                                 numeros_telefonicos[]
+  numeros_telefonicos_log                             numeros_telefonicos_log[]
+  opciones                                            opciones[]
+  opciones_log                                        opciones_log[]
+  personas_personas_borrado_porTousuarios             personas[]                         @relation("personas_borrado_porTousuarios")
+  personas_log                                        personas_log[]
+  roles_usuarios_roles_usuarios_creado_porTousuarios  roles_usuarios[]                   @relation("roles_usuarios_creado_porTousuarios")
+  roles_usuarios_roles_usuarios_borrado_porTousuarios roles_usuarios[]                   @relation("roles_usuarios_borrado_porTousuarios")
+  roles_usuarios_log                                  roles_usuarios_log[]
+  usuarios_usuarios_creado_porTousuarios              usuarios?                          @relation("usuarios_creado_porTousuarios", fields: [creado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "users_created_by_fkey")
+  other_usuarios_usuarios_creado_porTousuarios        usuarios[]                         @relation("usuarios_creado_porTousuarios")
+  usuarios_usuarios_borrado_porTousuarios             usuarios?                          @relation("usuarios_borrado_porTousuarios", fields: [borrado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "users_deleted_by_fkey")
+  other_usuarios_usuarios_borrado_porTousuarios       usuarios[]                         @relation("usuarios_borrado_porTousuarios")
+  personas_usuarios_persona_idTopersonas              personas?                          @relation("usuarios_persona_idTopersonas", fields: [persona_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "users_persona_id_fkey")
+  usuarios_log_usuarios_log_cambiado_porTousuarios    usuarios_log[]                     @relation("usuarios_log_cambiado_porTousuarios")
+  usuarios_log_usuarios_log_usuario_idTousuarios      usuarios_log[]                     @relation("usuarios_log_usuario_idTousuarios")
+
+  @@index([correo], map: "idx_users_email")
+  @@index([usuario], map: "idx_users_username")
+  @@schema("users_sec_transporte")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model usuarios_log {
+  log_id                                       Int       @id(map: "users_log_pkey") @default(autoincrement())
+  usuario_id                                   Int?
+  tipo_accion                                  String?   @db.VarChar(10)
+  cambiado_por                                 Int?
+  cambiado_en                                  DateTime? @default(now()) @db.Timestamptz(6)
+  datos_anteriores                             Json?
+  datos_nuevos                                 Json?
+  usuarios_usuarios_log_cambiado_porTousuarios usuarios? @relation("usuarios_log_cambiado_porTousuarios", fields: [cambiado_por], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "users_log_changed_by_fkey")
+  usuarios_usuarios_log_usuario_idTousuarios   usuarios? @relation("usuarios_log_usuario_idTousuarios", fields: [usuario_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "users_log_user_id_fkey")
+
+  @@index([usuario_id], map: "idx_users_log_user_id")
+  @@schema("users_sec_transporte")
+}
