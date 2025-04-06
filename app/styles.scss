@@ -4,8 +4,8 @@
 $max-width: 1300px;
 $header-height: 11vh;
 $footer-height: 7vh;
-$main-height: calc(100vh - #{$header-height} - #{$footer-height});
-$edge-spacing: 0.2rem;
+$main-height: calc(91vh - #{$header-height} - #{$footer-height});
+$edge-spacing: 0.1rem;
 
 /* Base font size and scaling */
 $base-font-size: 16px; 
@@ -83,7 +83,7 @@ body {
   background-color: $color-background-primary-light;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 98vh;
   margin: 0;
   font-size: 16px;
   line-height: 1.5;
