@@ -251,32 +251,6 @@ header, main, section, h1, h2, h3, article, footer {
   box-sizing: border-box;
 }
 
-nav ul {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1rem;
-  padding: 0;
-  margin: 0;
-  list-style: none;
-}
-
-nav a {
-  color: #000;
-  text-decoration: none;
-  padding: .5rem 1rem;
-  border-radius: 4px;
-  transition: opacity .2s;
-}
-
-nav a:hover {
-  opacity: .8;
-}
-
-nav a.active {
-  font-weight: bold;
-}
-
 [data-theme="dark"] nav a {
   color: #fefae0;
 }
@@ -294,92 +268,39 @@ nav a.active {
   height: 0;
 }
 
-.slider {
+.theme-switch .slider {
   position: absolute;
-  cursor: pointer;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background-color: var(--color-switch-background);
-  transition: all .4s;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: background-color .4s;
 }
 
-.slider:before {
-  position: absolute;
+.theme-switch .slider:before {
   content: "";
+  position: absolute;
   height: 22px;
   width: 22px;
   left: 4px;
   bottom: 4px;
   background-color: var(--color-switch-button);
-  transition: all .4s;
+  border-radius: 50%;
+  transition: transform .4s;
 }
 
-[data-theme="dark"] .slider {
-  background-color: #666;
-}
-
-input:checked + .slider {
+.theme-switch input:checked + .slider {
   background-color: var(--color-accent-primary);
 }
 
-[data-theme="dark"] input:checked + .slider {
-  background-color: #a0a0a0;
-}
-
-input:checked + .slider:before {
+.theme-switch input:checked + .slider:before {
   transform: translateX(22px);
 }
 
-.slider.round {
-  border-radius: 30px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
-
-.container-basic-border {
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 1rem;
-  margin: .5rem auto;
-  width: 95%;
-  max-width: 1300px;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-[data-theme="dark"] .container-basic-border {
-  border-color: #444;
-}
-
-.container-basic {
-  width: 95%;
-  max-width: 1300px;
-  margin: .5rem auto;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.container-basic-left {
-  width: 95%;
-  max-width: 1300px;
-  margin: .5rem auto;
-  text-align: left;
-}
-
-.container-basic-center {
-  width: 95%;
-  max-width: 1300px;
-  margin: .5rem auto;
-  text-align: center;
-}
-
-.container, .container-center, .container-left, .container-border {
+.container, .container-center, .container-left {
   width: 95%;
   max-width: 1300px;
   margin: .5rem auto;
@@ -392,6 +313,12 @@ input:checked + .slider:before {
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 1rem;
+  margin: .5rem auto;
+  width: 95%;
+  max-width: 1300px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .container-left {
@@ -437,25 +364,6 @@ footer {
   margin-top: .3rem;
 }
 
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: gray;
-  color: #fff;
-  padding: 8px;
-  z-index: 100;
-  transition: top .3s;
-}
-
-.skip-link:focus {
-  top: 0;
-}
-
-[data-theme="dark"] .skip-link {
-  background: #a0a0a0;
-}
-
 .header-content {
   display: flex;
   flex-direction: column;
@@ -473,18 +381,6 @@ footer {
   justify-content: center;
 }
 
-.legal-text {
-  display: block;
-  margin-top: .5rem;
-  font-size: .8rem;
-  opacity: .8;
-  color: #666;
-}
-
-[data-theme="dark"] .legal-text {
-  color: #a0a0a0;
-}
-
 @media (width >= 600px) {
   body {
     font-size: 17px;
@@ -495,13 +391,8 @@ footer {
     justify-content: space-between;
   }
 
-  .container-basic, .container-basic-border, .container-basic-left, .container-basic-center {
+  .container, .container-left, .container-center {
     width: 90%;
-  }
-
-  .legal-text {
-    display: inline;
-    margin-top: 0;
   }
 }
 
@@ -510,7 +401,7 @@ footer {
     font-size: 18px;
   }
 
-  .container-basic, .container-basic-border, .container-basic-left, .container-basic-center {
+  .container, .container-left, .container-center {
     width: 85%;
   }
 }
@@ -519,6 +410,17 @@ footer {
   --color-switch-background: #666;
   --color-switch-button: #fff;
   --color-accent-primary: #a0a0a0;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: gray;
+  color: #fff;
+  padding: 8px;
+  z-index: 100;
+  transition: top .3s;
 }
 
 

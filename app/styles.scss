@@ -6,6 +6,14 @@ $header-height: 11vh;
 $footer-height: 7vh;
 $main-height: calc(91vh - #{$header-height} - #{$footer-height});
 $edge-spacing: 0.1rem;
+$border-thin: 1px; // Thin border width
+$slider-button-size: 22px; // Size of the slider button
+$theme-switch-width: 52px; // Width of the theme switch
+$theme-switch-height: 30px; // Height of the theme switch
+$container-margin: 0.5rem; // Margin for containers
+$container-padding: 1rem; // Padding for containers
+$skip-link-top: -40px; // Initial position of skip link
+$skip-link-padding: 8px; // Padding for skip link
 
 /* Base font size and scaling */
 $base-font-size: 16px; 
@@ -19,9 +27,6 @@ $spacing-medium: .3rem;
 $spacing-large: 1.5rem; 
 
 /* Component dimensions */
-$theme-switch-width: 3.25rem; 
-$theme-switch-height: 1.875rem; 
-$slider-button-size: 1.375rem; 
 $container-width: 95%;
 $container-max-width: 81.25rem; 
 
@@ -102,138 +107,63 @@ header, main, section, h1, h2, h3, article, footer {
 }
 
 /* Navigation styles */
-nav {
-  ul {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    padding: 0;
-    margin: 0;
-    list-style: none;
-  }
-
-  a {
-    color: $color-text-primary-light;
-    text-decoration: none;
-    padding: 0.5rem 1rem;
-    border-radius: 4px;
-    transition: opacity 0.2s ease;
-
-    &:hover {
-      opacity: 0.8;
-    }
-
-    &.active {
-      font-weight: bold;
-    }
-  }
-}
 
 [data-theme="dark"] nav a {
   color: $color-text-primary-dark;
 }
 
 /* Theme switch styles */
+$theme-switch-width: 52px;
+$theme-switch-height: 30px;
+$slider-size: 22px;
+$border-radius: 30px;
+
 .theme-switch {
   position: relative;
   display: inline-block;
-  width: 52px;
-  height: 30px;
+  width: $theme-switch-width;
+  height: $theme-switch-height;
 
   input {
     opacity: 0;
     width: 0;
     height: 0;
   }
-}
 
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--color-switch-background);
-  transition: 0.4s;
-
-  &:before {
+  .slider {
     position: absolute;
-    content: "";
-    height: 22px;
-    width: 22px;
-    left: 4px;
-    bottom: 4px;
-    background-color: var(--color-switch-button);
-    transition: 0.4s;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--color-switch-background);
+    border-radius: $border-radius;
+    cursor: pointer;
+    transition: background-color 0.4s;
+
+    &:before {
+      content: "";
+      position: absolute;
+      height: $slider-size;
+      width: $slider-size;
+      left: 4px;
+      bottom: 4px;
+      background-color: var(--color-switch-button);
+      border-radius: 50%;
+      transition: transform 0.4s;
+    }
   }
-}
 
-[data-theme="dark"] .slider {
-  background-color: $color-switch-background-dark;
-}
+  input:checked + .slider {
+    background-color: var(--color-accent-primary);
 
-input:checked + .slider {
-  background-color: var(--color-accent-primary);
-}
-
-[data-theme="dark"] input:checked + .slider {
-  background-color: $color-accent-primary-dark;
-}
-
-input:checked + .slider:before {
-  transform: translateX(22px);
-}
-
-.slider.round {
-  border-radius: 30px;
-
-  &:before {
-    border-radius: 50%;
+    &:before {
+      transform: translateX(calc($theme-switch-width - $slider-size - 8px));
+    }
   }
 }
 
 /* Container styles */
-.container-basic-border {
-  border: 1px solid $color-border-primary-light;
-  border-radius: 8px;
-  padding: 1rem;
-  margin: 0.5rem auto;
-  width: 95%;
-  max-width: $max-width;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-[data-theme="dark"] .container-basic-border {
-  border-color: $color-border-primary-dark;
-}
-
-.container-basic {
-  width: 95%;
-  max-width: $max-width;
-  margin: 0.5rem auto;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.container-basic-left {
-  width: 95%;
-  max-width: $max-width;
-  margin: 0.5rem auto;
-  text-align: left;
-}
-
-.container-basic-center {
-  width: 95%;
-  max-width: $max-width;
-  margin: 0.5rem auto;
-  text-align: center;
-}
-
 .container {
   width: 95%;
   max-width: $max-width;
@@ -244,10 +174,15 @@ input:checked + .slider:before {
 }
 
 .container-border {
-  @extend .container;
-  border: 1px solid $color-border-primary-light;
+  border: $border-thin solid $color-border-primary-light;
   border-radius: 8px;
-  padding: 1rem;
+  padding: $container-padding;
+  margin: $container-margin auto;
+  width: 95%;
+  max-width: $max-width;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .container-left {
@@ -298,26 +233,6 @@ footer {
   margin-top: $spacing-medium; 
 }
 
-/* Accessibility */
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: $color-accent-primary-light;
-  color: $color-switch-button;
-  padding: 8px;
-  z-index: 100;
-  transition: top 0.3s;
-
-  &:focus {
-    top: 0;
-  }
-}
-
-[data-theme="dark"] .skip-link {
-  background: $color-accent-primary-dark;
-}
-
 /* Header Components */
 .header-content {
   display: flex;
@@ -337,18 +252,6 @@ footer {
   justify-content: center;
 }
 
-.legal-text {
-  display: block;
-  margin-top: 0.5rem;
-  font-size: 0.8rem;
-  opacity: 0.8;
-  color: $color-text-secondary-light;
-}
-
-[data-theme="dark"] .legal-text {
-  color: $color-text-secondary-dark;
-}
-
 /* Tablet styles */
 @media (min-width: 600px) {
   body {
@@ -360,16 +263,8 @@ footer {
     justify-content: space-between;
   }
 
-  .container-basic,
-  .container-basic-border,
-  .container-basic-left,
-  .container-basic-center {
+  .container {
     width: 90%;
-  }
-
-  .legal-text {
-    display: inline;
-    margin-top: 0;
   }
 }
 
@@ -379,10 +274,7 @@ footer {
     font-size: 18px;
   }
 
-  .container-basic,
-  .container-basic-border,
-  .container-basic-left,
-  .container-basic-center {
+  .container {
     width: 85%;
   }
 }
@@ -393,6 +285,13 @@ footer {
   --color-accent-primary: #a0a0a0;
 }
 
-// * {
-//   box-sizing: border-box;
-// }
+.skip-link {
+  position: absolute;
+  top: $skip-link-top;
+  left: 0;
+  background: $color-accent-primary-light;
+  color: $color-switch-button;
+  padding: $skip-link-padding;
+  z-index: 100;
+  transition: top 0.3s;
+}
